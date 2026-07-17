@@ -1,0 +1,27 @@
+kind = "web"
+previewPath = "/"
+title = "WikiAI"
+version = "1.0.0"
+id = "artifacts/wiki-ai"
+router = "path"
+
+[[services]]
+name = "web"
+paths = [ "/" ]
+localPort = 21485
+
+[services.development]
+run = "pnpm --filter @workspace/wiki-ai run dev"
+
+[services.production]
+build = [ "pnpm", "--filter", "@workspace/wiki-ai", "run", "build" ]
+serve = "static"
+publicDir = "artifacts/wiki-ai/dist/public"
+
+[[services.production.rewrites]]
+from = "/*"
+to = "/index.html"
+
+[services.env]
+PORT = "21485"
+BASE_PATH = "/"

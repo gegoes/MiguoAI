@@ -1,0 +1,119 @@
+import { useState, useRef, useEffect } from "react";
+import { SendHorizonal, LibraryBig } from "lucide-react";
+import { useChat } from "@/hooks/use-chat";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { EmptyState } from "@/components/empty-state";
+import { MessageBubble } from "@/components/message-bubble";
+
+export default function ChatPage() {
+  const { messages, sendMessage, isLoading } = useChat();
+  const [input, setInput] = useState("");
+  const scrollAreaRef = useRef<HTMLDivElement>(null);
+  const inputRef = useRef<HTMLInputElement>(null);
+
+  // Auto scroll to bottom
+  useEffect(() => {
+    if (scrollAreaRef.current) {
+      scrollAreaRef.current.scrollTo({
+        top: scrollAreaRef.current.scrollHeight,
+        behavior: "smooth",
+      });
+    }
+  }, [messages]);
+
+  // Focus input on mount
+  useEffect(() => {
+    inputRef.current?.focus();
+  }, []);
+
+  const handleSubmit = (e?: React.FormEvent) => {
+    e?.preventDefault();
+    if (input.trim() && !isLoading) {
+      sendMessage(input.trim());
+      setInput("");
+    }
+  };
+
+  return (
+    <div className="flex flex-col h-[100dvh] w-full bg-background overflow-hidden relative">
+      {/* Header */}
+      <header className="flex-none px-6 py-4 flex items-center gap-3 border-b border-border/40 bg-background/80 backdrop-blur-md z-10 sticky top-0">
+        <div className="w-10 h-10 bg-primary text-primary-foreground rounded-xl flex items-center justify-center shadow-sm">
+          <LibraryBig className="w-5 h-5" />
+        </div>
+        <div>
+          <h1 className="font-serif text-xl font-bold tracking-tight">WikiAI</h1>
+          <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Knowledge Assistant</p>
+        </div>
+      </header>
+
+      {/* Main Chat Area */}
+      <main 
+        ref={scrollAreaRef}
+        className="flex-1 overflow-y-auto px-4 sm:px-6 md:px-8 py-8 scroll-smooth"
+      >
+        <div className="max-w-3xl mx-auto w-full flex flex-col min-h-full">
+          {messages.length === 0 ? (
+            <div className="flex-1 flex flex-col justify-center">
+              <EmptyState 
+                onSuggest={(text) => {
+                  sendMessage(text);
+                }} 
+              />
+            </div>
+          ) : (
+            <div className="flex flex-col justify-end min-h-full pb-4">
+              {messages.map((message) => (
+                <MessageBubble key={message.id} message={message} />
+              ))}
+            </div>
+          )}
+        </div>
+      </main>
+
+      {/* Input Area */}
+      <div className="flex-none p-4 sm:p-6 bg-gradient-to-t from-background via-background to-transparent pt-10">
+        <div className="max-w-3xl mx-auto w-full relative">
+          <form 
+            onSubmit={handleSubmit}
+            className="relative flex items-center"
+          >
+            <Input
+              ref={inputRef}
+              value={input}
+              onChange={(e) => setInput(e.target.value)}
+              placeholder="Ask anything..."
+              className="pr-16 text-[15px] shadow-sm bg-card border-border/60 focus-visible:ring-primary/20"
+              disabled={isLoading}
+              data-testid="input-chat"
+            />
+            <Button
+              type="submit"
+              size="icon"
+              disabled={!input.trim() || isLoading}
+              className="absolute right-1.5 h-9 w-9 rounded-full transition-transform active:scale-95"
+              data-testid="button-send"
+            >
+              <SendHorizonal className="w-4 h-4" />
+              <span className="sr-only">Send message</span>
+            </Button>
+          </form>
+          <div className="text-center mt-3">
+            <p className="text-xs text-muted-foreground/70 font-medium tracking-wide">
+              Results provided by the free Wikipedia API.
+            </p>
+          </div>
+        </div>
+      </div>
+      
+      {/* Decorative background noise (subtle) */}
+      <div 
+        className="pointer-events-none fixed inset-0 z-50 opacity-[0.015]"
+        style={{
+          backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noiseFilter'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.65' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noiseFilter)'/%3E%3C/svg%3E")`,
+        }}
+      />
+    </div>
+  );
+}
