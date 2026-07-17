@@ -1,11 +1,9 @@
-import { useState, useRef, useEffect } from 'react';
-import { searchWikipedia, type WikipediaSummary } from '@/lib/wikipedia';
+import { useState } from 'react';
 
 export type Message = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  data?: WikipediaSummary;
   error?: boolean;
   status: 'loading' | 'success' | 'error';
 };
@@ -36,44 +34,33 @@ export function useChat() {
     setIsLoading(true);
 
     try {
-      const summary = await searchWikipedia(text);
-      
+      const response = await fetch('/api/ask', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ question: text }),
+      });
+
+      if (!response.ok) {
+        throw new Error(`Server error: ${response.status}`);
+      }
+
+      const data = await response.json() as { answer: string };
+
       setMessages((prev) =>
-        prev.map((msg) => {
-          if (msg.id === assistantMessageId) {
-            if (!summary) {
-              return {
-                ...msg,
-                content: "I couldn't find anything on Wikipedia for that. Could you try asking in a different way?",
-                status: 'success',
-              };
-            }
-            if (!summary.extract) {
-              return {
-                ...msg,
-                content: "Wikipedia has an article for this, but no summary is available.",
-                data: summary,
-                status: 'success',
-              };
-            }
-            return {
-              ...msg,
-              content: summary.extract,
-              data: summary,
-              status: 'success',
-            };
-          }
-          return msg;
-        })
+        prev.map((msg) =>
+          msg.id === assistantMessageId
+            ? { ...msg, content: data.answer, status: 'success' as const }
+            : msg
+        )
       );
-    } catch (error) {
+    } catch {
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantMessageId
             ? {
                 ...msg,
-                content: 'Sorry, I encountered an error while searching Wikipedia. Please try again later.',
-                status: 'error',
+                content: 'Sorry, something went wrong. Please try again.',
+                status: 'error' as const,
                 error: true,
               }
             : msg
@@ -84,9 +71,5 @@ export function useChat() {
     }
   };
 
-  return {
-    messages,
-    sendMessage,
-    isLoading,
-  };
+  return { messages, sendMessage, isLoading };
 }

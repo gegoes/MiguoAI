@@ -10,6 +10,8 @@ servers:
 tags:
   - name: health
     description: Health operations
+  - name: ask
+    description: AI Q&A operations
 paths:
   /healthz:
     get:
@@ -24,6 +26,24 @@ paths:
             application/json:
               schema:
                 $ref: "#/components/schemas/HealthStatus"
+  /ask:
+    post:
+      operationId: askQuestion
+      tags: [ask]
+      summary: Ask a question to DeepSeek AI
+      requestBody:
+        required: true
+        content:
+          application/json:
+            schema:
+              $ref: "#/components/schemas/AskInput"
+      responses:
+        "200":
+          description: AI-generated answer
+          content:
+            application/json:
+              schema:
+                $ref: "#/components/schemas/AskAnswer"
 components:
   schemas:
     HealthStatus:
@@ -33,4 +53,17 @@ components:
           type: string
       required:
         - status
-
+    AskInput:
+      type: object
+      properties:
+        question:
+          type: string
+      required:
+        - question
+    AskAnswer:
+      type: object
+      properties:
+        answer:
+          type: string
+      required:
+        - answer
