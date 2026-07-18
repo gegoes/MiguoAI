@@ -10,6 +10,15 @@ interface MessageBubbleProps {
   message: Message;
 }
 
+// Convert \[...\] and \(...\) to $$...$$ and $...$ so remark-math picks them up
+function normalizeMath(text: string): string {
+  return text
+    .replace(/\\\[/g, "$$$$")
+    .replace(/\\\]/g, "$$$$")
+    .replace(/\\\(/g, "$")
+    .replace(/\\\)/g, "$");
+}
+
 export function MessageBubble({ message }: MessageBubbleProps) {
   const isUser = message.role === "user";
 
@@ -53,7 +62,7 @@ export function MessageBubble({ message }: MessageBubbleProps) {
               remarkPlugins={[remarkMath]}
               rehypePlugins={[rehypeKatex]}
             >
-              {message.content}
+              {normalizeMath(message.content)}
             </ReactMarkdown>
           </div>
         )}

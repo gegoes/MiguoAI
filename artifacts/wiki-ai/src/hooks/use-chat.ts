@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 
 export type Message = {
   id: string;
@@ -8,9 +8,42 @@ export type Message = {
   status: 'loading' | 'success' | 'error';
 };
 
+const STORAGE_KEY = 'miguoai-chat-history';
+
+function loadHistory(): Message[] {
+  try {
+    const raw = localStorage.getItem(STORAGE_KEY);
+    if (!raw) return [];
+    const parsed = JSON.parse(raw) as Message[];
+    // Never restore loading messages
+    return parsed.filter((m) => m.status !== 'loading');
+  } catch {
+    return [];
+  }
+}
+
+function saveHistory(messages: Message[]) {
+  try {
+    const toSave = messages.filter((m) => m.status !== 'loading');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(toSave));
+  } catch {
+    // storage full or unavailable — silently ignore
+  }
+}
+
 export function useChat() {
-  const [messages, setMessages] = useState<Message[]>([]);
+  const [messages, setMessages] = useState<Message[]>(loadHistory);
   const [isLoading, setIsLoading] = useState(false);
+
+  // Persist to localStorage whenever messages change
+  useEffect(() => {
+    saveHistory(messages);
+  }, [messages]);
+
+  const clearHistory = () => {
+    setMessages([]);
+    localStorage.removeItem(STORAGE_KEY);
+  };
 
   const sendMessage = async (text: string) => {
     if (!text.trim()) return;
@@ -85,5 +118,5 @@ export function useChat() {
     }
   };
 
-  return { messages, sendMessage, isLoading };
+  return { messages, sendMessage, isLoading, clearHistory };
 }

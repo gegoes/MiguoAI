@@ -1,5 +1,5 @@
 import { useState, useRef, useEffect } from "react";
-import { SendHorizonal } from "lucide-react";
+import { SendHorizonal, Trash2 } from "lucide-react";
 import { useChat } from "@/hooks/use-chat";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -7,7 +7,7 @@ import { EmptyState } from "@/components/empty-state";
 import { MessageBubble } from "@/components/message-bubble";
 
 export default function ChatPage() {
-  const { messages, sendMessage, isLoading } = useChat();
+  const { messages, sendMessage, isLoading, clearHistory } = useChat();
   const [input, setInput] = useState("");
   const scrollAreaRef = useRef<HTMLDivElement>(null);
   const inputRef = useRef<HTMLInputElement>(null);
@@ -43,11 +43,25 @@ export default function ChatPage() {
               <EmptyState onSuggest={(text) => sendMessage(text)} />
             </div>
           ) : (
-            <div className="flex flex-col justify-end min-h-full pb-4">
-              {messages.map((message) => (
-                <MessageBubble key={message.id} message={message} />
-              ))}
-            </div>
+            <>
+              {/* Clear history button */}
+              <div className="flex justify-end mb-4">
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  onClick={clearHistory}
+                  className="text-xs text-muted-foreground/60 hover:text-destructive gap-1.5"
+                >
+                  <Trash2 className="w-3.5 h-3.5" />
+                  Clear chat
+                </Button>
+              </div>
+              <div className="flex flex-col justify-end min-h-full pb-4">
+                {messages.map((message) => (
+                  <MessageBubble key={message.id} message={message} />
+                ))}
+              </div>
+            </>
           )}
         </div>
       </div>
@@ -63,14 +77,15 @@ export default function ChatPage() {
               placeholder="Ask anything..."
               className="pr-16 text-[15px] shadow-sm bg-card border-border/60 focus-visible:ring-primary/20"
               disabled={isLoading}
-              data-testid="input-chat"
+              onKeyDown={(e) => {
+                if (e.key === "Enter" && !e.shiftKey) handleSubmit();
+              }}
             />
             <Button
               type="submit"
               size="icon"
               disabled={!input.trim() || isLoading}
               className="absolute right-1.5 h-9 w-9 rounded-full transition-transform active:scale-95"
-              data-testid="button-send"
             >
               <SendHorizonal className="w-4 h-4" />
               <span className="sr-only">Send message</span>
