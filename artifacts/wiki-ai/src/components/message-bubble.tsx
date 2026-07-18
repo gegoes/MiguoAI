@@ -1,6 +1,10 @@
 import { motion } from "framer-motion";
 import { type Message } from "@/hooks/use-chat";
 import { Sparkles } from "lucide-react";
+import ReactMarkdown from "react-markdown";
+import remarkMath from "remark-math";
+import rehypeKatex from "rehype-katex";
+import "katex/dist/katex.min.css";
 
 interface MessageBubbleProps {
   message: Message;
@@ -39,13 +43,20 @@ export function MessageBubble({ message }: MessageBubbleProps) {
           }
         `}
       >
-        <p
-          className={`text-[15px] leading-relaxed font-medium whitespace-pre-wrap ${
-            isUser ? "text-primary-foreground/95" : "opacity-90"
-          }`}
-        >
-          {message.content}
-        </p>
+        {isUser ? (
+          <p className="text-[15px] leading-relaxed font-medium whitespace-pre-wrap text-primary-foreground/95">
+            {message.content}
+          </p>
+        ) : (
+          <div className="prose prose-sm dark:prose-invert max-w-none text-[15px] leading-relaxed opacity-90 [&_.katex]:text-base [&_.katex-display]:overflow-x-auto [&_.katex-display]:py-2">
+            <ReactMarkdown
+              remarkPlugins={[remarkMath]}
+              rehypePlugins={[rehypeKatex]}
+            >
+              {message.content}
+            </ReactMarkdown>
+          </div>
+        )}
       </div>
     </motion.div>
   );
