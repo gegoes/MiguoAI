@@ -34,20 +34,36 @@ export function useChat() {
     setIsLoading(true);
 
     try {
-      const response = await fetch('/api/ask', {
+      const history = [...messages, userMessage].map((m) => ({
+        role: m.role,
+        content: m.content,
+      }));
+
+      const response = await fetch('https://text.pollinations.ai/', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: text }),
+        body: JSON.stringify({
+          messages: [
+            {
+              role: 'system',
+              content:
+                'You are MiguoAI, a knowledgeable and helpful assistant. Answer questions clearly and accurately.',
+            },
+            ...history,
+          ],
+          model: 'openai',
+          private: true,
+        }),
       });
 
-      if (!response.ok) throw new Error(`Server error: ${response.status}`);
+      if (!response.ok) throw new Error(`Error: ${response.status}`);
 
-      const data = await response.json() as { answer: string };
+      const answer = await response.text();
 
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantMessageId
-            ? { ...msg, content: data.answer, status: 'success' as const }
+            ? { ...msg, content: answer.trim(), status: 'success' as const }
             : msg
         )
       );
@@ -55,7 +71,12 @@ export function useChat() {
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantMessageId
-            ? { ...msg, content: 'Sorry, something went wrong. Please try again.', status: 'error' as const, error: true }
+            ? {
+                ...msg,
+                content: 'Sorry, something went wrong. Please try again.',
+                status: 'error' as const,
+                error: true,
+              }
             : msg
         )
       );
