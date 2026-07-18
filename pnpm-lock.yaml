@@ -413,6 +413,13 @@ importers:
         version: 3.25.76
 
   artifacts/wiki-ai:
+    dependencies:
+      '@vercel/node':
+        specifier: ^5.0.2
+        version: 5.8.26(rollup@4.62.2)
+      openai:
+        specifier: ^4.103.0
+        version: 4.104.0(zod@3.25.76)
     devDependencies:
       '@hookform/resolvers':
         specifier: ^3.10.0
