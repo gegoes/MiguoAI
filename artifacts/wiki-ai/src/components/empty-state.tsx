@@ -25,7 +25,7 @@ export function EmptyState({ onSuggest }: EmptyStateProps) {
       </h1>
 
       <p className="text-lg text-muted-foreground mb-10 max-w-lg leading-relaxed">
-        Powered by DeepSeek AI — ask any question and get a clear, thoughtful answer instantly.
+        Powered by Groq AI — ask any question and get a clear, thoughtful answer instantly.
       </p>
 
       <div className="flex flex-wrap gap-3 justify-center">

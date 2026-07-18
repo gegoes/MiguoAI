@@ -3,9 +3,9 @@ import OpenAI from "openai";
 
 const router = Router();
 
-const deepseek = new OpenAI({
-  apiKey: process.env["DEEPSEEK_API_KEY"] ?? "",
-  baseURL: "https://api.deepseek.com",
+const groq = new OpenAI({
+  apiKey: process.env["GROQ_API_KEY"] ?? "",
+  baseURL: "https://api.groq.com/openai/v1",
 });
 
 router.post("/ask", async (req, res) => {
@@ -17,8 +17,8 @@ router.post("/ask", async (req, res) => {
   }
 
   try {
-    const completion = await deepseek.chat.completions.create({
-      model: "deepseek-chat",
+    const completion = await groq.chat.completions.create({
+      model: "llama-3.3-70b-versatile",
       max_tokens: 8192,
       messages: [
         {
@@ -39,7 +39,7 @@ router.post("/ask", async (req, res) => {
 
     res.json({ answer });
   } catch (err) {
-    req.log.error({ err }, "DeepSeek API error");
+    req.log.error({ err }, "Groq API error");
     res.status(500).json({ error: "Failed to generate answer" });
   }
 });
