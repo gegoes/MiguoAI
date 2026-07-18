@@ -4,7 +4,6 @@ export type Message = {
   id: string;
   role: 'user' | 'assistant';
   content: string;
-  thinking?: string | null;
   error?: boolean;
   status: 'loading' | 'success' | 'error';
 };
@@ -13,7 +12,7 @@ export function useChat() {
   const [messages, setMessages] = useState<Message[]>([]);
   const [isLoading, setIsLoading] = useState(false);
 
-  const sendMessage = async (text: string, deepthink = false) => {
+  const sendMessage = async (text: string) => {
     if (!text.trim()) return;
 
     const userMessage: Message = {
@@ -38,17 +37,17 @@ export function useChat() {
       const response = await fetch('/api/ask', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ question: text, deepthink }),
+        body: JSON.stringify({ question: text }),
       });
 
       if (!response.ok) throw new Error(`Server error: ${response.status}`);
 
-      const data = await response.json() as { answer: string; thinking?: string | null };
+      const data = await response.json() as { answer: string };
 
       setMessages((prev) =>
         prev.map((msg) =>
           msg.id === assistantMessageId
-            ? { ...msg, content: data.answer, thinking: data.thinking ?? null, status: 'success' as const }
+            ? { ...msg, content: data.answer, status: 'success' as const }
             : msg
         )
       );
