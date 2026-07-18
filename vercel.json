@@ -1,7 +1,7 @@
 {
   "installCommand": "pnpm install --no-frozen-lockfile",
   "buildCommand": "pnpm --filter @workspace/wiki-ai run build",
-  "outputDirectory": "artifacts/wiki-ai/dist",
+  "outputDirectory": "artifacts/wiki-ai/dist/public",
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/(.*)", "destination": "/index.html" }
