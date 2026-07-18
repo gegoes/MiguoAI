@@ -45,7 +45,7 @@ export default function ChatPage() {
           <BrainCircuit className="w-5 h-5" />
         </div>
         <div className="flex-1">
-          <h1 className="font-serif text-xl font-bold tracking-tight">WikiAI</h1>
+          <h1 className="font-serif text-xl font-bold tracking-tight">MiguoAI</h1>
           <p className="text-xs font-medium text-muted-foreground uppercase tracking-widest">Powered by Groq</p>
         </div>
         <Button
