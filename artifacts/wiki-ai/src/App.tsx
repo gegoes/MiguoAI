@@ -4,16 +4,21 @@ import { Toaster } from '@/components/ui/toaster';
 import { TooltipProvider } from '@/components/ui/tooltip';
 import NotFound from '@/pages/not-found';
 import ChatPage from '@/pages/chat';
+import ImageGenPage from '@/pages/image-gen';
+import Layout from '@/components/layout';
 import { Route, Switch, Router as WouterRouter } from 'wouter';
 
 const queryClient = new QueryClient();
 
 function Router() {
   return (
-    <Switch>
-      <Route path="/" component={ChatPage} />
-      <Route component={NotFound} />
-    </Switch>
+    <Layout>
+      <Switch>
+        <Route path="/" component={ChatPage} />
+        <Route path="/image" component={ImageGenPage} />
+        <Route component={NotFound} />
+      </Switch>
+    </Layout>
   );
 }
 
